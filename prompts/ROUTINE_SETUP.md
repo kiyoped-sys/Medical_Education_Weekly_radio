@@ -12,11 +12,11 @@
 
    | 項目 | 設定値 |
    |---|---|
-   | 名前 | `週刊・小児腎臓病ラジオ（毎週月曜 07:00 JST）` |
+   | 名前 | `週刊・医学教育ラジオ（毎週月曜 19:00 JST）` |
    | Instructions | 下の「貼り付け用プロンプト」をそのままコピー |
    | リポジトリ | `mynrminto/weekly_reports` |
    | 環境 | このプロジェクトの環境（`GEMINI_API_KEY` が設定済みのもの） |
-   | Select a trigger | **Schedule** → Weekly / 月曜 / 07:00（ローカル時刻で入力すれば自動変換） |
+   | Select a trigger | **Schedule** → Weekly / 月曜 / 19:00（ローカル時刻で入力すれば自動変換） |
    | **Connectors** タブ | **PubMed** と **Notion** が含まれていること（不要なものは外す） |
    | **動作** タブ | 変更不要（下記参照） |
 
@@ -61,7 +61,7 @@ PubMed と Notion をコネクタ経由にしているのはこのためで、�
 
 概要を一言で:
 
-> 毎週月曜の朝、claude.ai の定期実行が新しい作業セッションを立ち上げます。そのセッションが
+> 毎週月曜の夕方、claude.ai の定期実行が新しい作業セッションを立ち上げます。そのセッションが
 > PubMed で先週の新着論文を検索して3本選び、対話形式のラジオ台本を書き、Gemini の音声合成で
 > MP3 にして、図解画像と一緒に GitHub に保存し、Notion に音声つきのページとして掲載します。
 > 人の操作は要りません。
@@ -79,10 +79,10 @@ PubMed と Notion をコネクタ経由にしているのはこのためで、�
 ## 貼り付け用プロンプト
 
 ```
-あなたは「週刊・小児腎臓病ラジオ」の週次自動実行セッションです。以下を最初から最後まで自律実行してください（毎回まっさらな状態から始まります）。
+あなたは「週刊・医学教育ラジオ」の週次自動実行セッションです。以下を最初から最後まで自律実行してください（毎回まっさらな状態から始まります）。
 
 ## 前提
-- リポジトリ `mynrminto/weekly_reports`（このセッションにクローン済み）。
+- リポジトリ `kiyoped-sys/Medical_Education_Weekly_radio`（このセッションにクローン済み）。
 - 環境変数 GEMINI_API_KEY で Gemini TTS を使用（未設定なら音声のみスキップし、成果物と通知にその旨を明記）。
 - MCP コネクタ: PubMed（文献検索）と Notion（掲載）を使う。ツールが見つからない場合は ToolSearch で探す。
 
@@ -91,7 +91,7 @@ PubMed と Notion をコネクタ経由にしているのはこのためで、�
 2. **`prompts/weekly_radio_prompt.md` を読み、その正典手順に厳密に従うこと**。仕様を推測で補わず、Notion 掲載時は NFM 仕様 `notion://docs/enhanced-markdown-spec` を必ず参照する。
 3. 当日(JST)を DATE(YYYY-MM-DD) とし `reports/<DATE>/` に生成する。要点:
    - PubMed を「直近7日・(pediatric OR paediatric OR children OR childhood) AND (kidney disease OR nephrology OR nephrotic OR nephritis OR renal)・datetype=edat」で検索し、臨床インパクトと新規性を重視して **3本を厳選**（主題の重複は避け、症例報告や関連の薄いものは下げる）。
-   - 日本語の **2話者の対話台本**（進行役 ナオ × 解説役 マキ先生）。背景→試験デザイン→結果→臨床的含意まで深く掘り下げ、PMID を口頭でも述べ、各トピックの最後に **マキ先生が Take Home を3点**はっきり述べる。`script.md`（読み物）と `script.txt`（話者ラベル `ナオ:` / `マキ先生:` 付き、発話ごとに空行区切り）を作成。
+   - 日本語の **2話者の対話台本**（進行役 Mie × 解説役 Papas先生）。背景→試験デザイン→結果→臨床的含意まで深く掘り下げ、PMID を口頭でも述べ、各トピックの最後に **Papas先生が Take Home を3点**はっきり述べる。`script.md`（読み物）と `script.txt`（話者ラベル `Mie:` / `Papas先生:` 付き、発話ごとに空行区切り）を作成。
    - 音声: `python scripts/tts_gemini.py reports/<DATE>/script.txt reports/<DATE>/radio.mp3 --speakers "ナオ=Puck,マキ先生=Kore"`（MP3 は 5MiB 未満に収める）。
    - インフォグラフィック: 3本・各 Take Home・2話者表示の自己完結 HTML を作り、`python scripts/render_infographic.py reports/<DATE>/infographic.html reports/<DATE>/infographic.png` で PNG 化。
    - `reports/<DATE>/` 一式（script.md, script.txt, articles.json, infographic.html, infographic.png, radio.mp3）を commit し push する。push 先は手順書の指示に従う（main を試し、ブランチ制限で拒否されたら `claude/weekly`）。
