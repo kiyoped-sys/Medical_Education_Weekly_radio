@@ -1,4 +1,4 @@
-# 週刊・小児腎臓病ラジオ — 週次パイプライン手順書
+# 週刊・医学教育ラジオ — 週次パイプライン手順書
 
 これは毎週月曜の自動実行(Routine)が新しいセッションに渡す**正典手順**です。
 実行セッションはこのファイルの指示に従い、PubMed の新着から小児腎臓病トピックを選び、
@@ -14,24 +14,24 @@ Notion 掲載（音源を再生できる形で埋め込み）まで行います�
 
 ```yaml
 # 番組名
-show_name: "週刊・小児腎臓病ラジオ"
+show_name: "週刊・医学教育ラジオ"
 
 # PubMed 検索クエリ（専門領域を変えるならここ）
 pubmed_query: >-
-  (pediatric OR paediatric OR children OR childhood)
-  AND (kidney disease OR nephrology OR nephrotic OR nephritis OR renal)
+  (medical AND education)
+  OR (medical school OR hospital OR student OR resident OR faculty)
 
 # 1回あたりに取り上げる論文数
 topic_count: 3
 
 # 2話者の設定（name は台本の話者ラベルと完全一致させる。voice は Gemini の音声名）
 hosts:
-  - { role: "進行役", name: "ナオ",     voice: "Puck" }   # 聞き手・リスナー代弁
-  - { role: "解説役", name: "マキ先生", voice: "Kore" }   # 小児腎臓病が専門
+  - { role: "進行役", name: "Mie",     voice: "Puck" }   # 聞き手・リスナー代弁
+  - { role: "解説役", name: "Papas先生", voice: "Kore" }   # 医学教育専門家
 ```
 
 > 話者は **最大2名**（Gemini マルチスピーカーの上限）。以降の手順に出てくる
-> 「ナオ」「マキ先生」「3本」などの記述は、すべてこの設定欄の値を正とします。
+> 「Mie」「Papas先生」「3本」などの記述は、すべてこの設定欄の値を正とします。
 
 ---
 
@@ -39,8 +39,8 @@ hosts:
 - リポジトリ: `mynrminto/weekly_reports`（push 先ブランチは手順6で自動的に決まる）
 - 利用コネクタ(MCP): PubMed / Notion（Google Drive は任意のバックアップ）
 - 環境変数 `GEMINI_API_KEY`（未設定なら音声はスキップし、その旨を成果物と通知に明記）
-- Notion 掲載先データベース(data_source_id): **`1a961a49-2238-4dcb-87fc-53c23ffcb5d7`**
-  （「週刊・小児腎臓病ラジオ（各号）」DB。ハブページ: https://app.notion.com/p/3a84bd470a818169afbcefb2f3b7f11b ）
+- Notion 掲載先データベース(data_source_id): **`3abdd20d37af803d9bd4d39ef4aa8388`**
+  （「週刊・医学教育（各号）」DB。ハブページ: https://app.notion.com/p/3a84bd470a818169afbcefb2f3b7f11b ）
 
 ## 手順
 
@@ -69,19 +69,19 @@ hosts:
   および **`take_home`（3点の配列）**）。選外に回した候補は `not_selected_this_week` に理由付きで残す。
 
 ### 3. ラジオ台本 `reports/<DATE>/script.md` と読み上げ用 `script.txt`
-- **2話者の対話形式**。進行役 **ナオ**（聞き手・リスナー代弁）× 解説役 **マキ先生**（小児腎臓病専門）。
+- **2話者の対話形式**。進行役 **Mie**（聞き手・リスナー代弁）× 解説役 **Papas先生**（医学教育専門家）。
 - 構成:
   1. オープニング（番組名「週刊・小児腎臓病ラジオ」、今週の日付、2人の自己紹介、今週は3本を深掘りする旨）
   2. 各トピック（1本ずつ）: ナオの問いを挟みつつ、背景→方法/デザイン→結果→臨床的含意まで**詳しく**。
      誌名と発表時期に触れ、**PMID を口頭でも述べる**（例:「PMID は 12345678」）。
-     各トピックの最後に **マキ先生が「今日の Take Home」を3点**、はっきり口頭で述べる（聞き手が持ち帰れるように）。
+     各トピックの最後に **Papas先生が「今日の Take Home」を3点**、はっきり口頭で述べる（聞き手が持ち帰れるように）。
   3. クロージング（3本を貫く共通テーマ、出典は概要欄参照の案内）
 - 8〜10 分相当（およそ 3,000〜4,000 字）。医学的な断定は避け、原著参照を促す。
 - 読み上げ用 `script.txt` は Markdown 記号や URL を除いた素のテキスト。
-  **各発話を `ナオ: …` / `マキ先生: …` の話者ラベル付き**にし、発話ごとに空行で区切る（マルチスピーカー TTS 用）。
+  **各発話を `Mie: …` / `Papas先生: …` の話者ラベル付き**にし、発話ごとに空行で区切る（マルチスピーカー TTS 用）。
 
 ### 4. 音声 MP3（2話者マルチスピーカー）
-- `python scripts/tts_gemini.py reports/<DATE>/script.txt reports/<DATE>/radio.mp3 --speakers "ナオ=Puck,マキ先生=Kore"`
+- `python scripts/tts_gemini.py reports/<DATE>/script.txt reports/<DATE>/radio.mp3 --speakers "Mie=Puck,Papas先生=Kore"`
   - `--speakers` の名前は `script.txt` の話者ラベルと**完全一致**させる（Gemini マルチスピーカーは最大2話者）。
   - 声は環境変数 `GEMINI_TTS_SPEAKERS` でも指定可。単一話者に戻す場合は `--speakers` を省略。
 - 終了コード 2（キー未設定）の場合は音声をスキップし、以降のリンク欄に「音声: キー未設定のため未生成」と記す。
